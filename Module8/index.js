@@ -11,57 +11,99 @@
 
 // Require the express library and create the 
 // express app interface.
-var express = require('express');
-var app = express();
-var error = '<h1>Error 404: Invalid URL';
+const express = require('express');
+const app = express();
+const error = '<h1>Error 404: Invalid URL';
+const port = 3000;
 
-// Require routers
-var owners = require('./owners.js');
-app.use('/owners', owners);
-var cars = require('./cars.js');
-app.use('/cars', cars);
-var about = require('./about.js');
-app.use('/about', about);
+// Build a logger to get Date/Time, method, and url requested
+const logger = (req, res, next) => {
+    var current_datetime = new Date();
+    var formatted_date = 
+        current_datetime.getFullYear() +
+        "/" +
+        (current_datetime.getMonth() + 1) +
+        "/" +
+        current_datetime.getDate() +
+        " " +
+        current_datetime.getHours() +
+        ":" + 
+        current_datetime.getMinutes() +
+        ":" +
+        current_datetime.getSeconds();
+
+        var method = req.method;
+        var url = req.url;
+        let log = formatted_date + " " + method + ": " + url;
+
+        console.log(log);
+        next();   
+};
 
 // Middlware logger
-app.use(function(req, res, next){
-    console.log("A new request received at" + Date.now());
-    next();
-});
+app.use(logger);
+
+// Require routers
+const owners = require('./owners.js');
+app.use('/owners', owners);
+const cars = require('./cars.js');
+app.use('/cars', cars);
+const about = require('./about.js');
+app.use('/about', about);
 
 // Designing the main page
-app.get('/', function(req, res){
+var path = '/'
+const ul_links = '<ul>\
+                    <li><a href="/">Main Page</a></li>\
+                    <li><a href="/about">About The Assignment</a></li>\
+                    <li><a href="/owners">List All Owners</a></li>\
+                    <li><a href="/owners/new">Enter a New Car Owner</a></li>\
+                    <li><a href="/owners/:id">List Details of a Single Owner</a></li>\
+                    <li><a href="/owners/:id/edit">Edit Owner Details</a></li>\
+                    <li><a href="/cars">Display a Graph of Cars</a></li>\
+                </ul>'
+
+app.get(path, function(req, res){
     res.send('\
-        <h1>Welcome to The Main Page<h1><br></br>\
-        <img src="public/image.jpg"><br></br>\
-        <ul>\
-            <li><a href="/">Main Page</a></li>\
-            <li><a href="/about">About The Assignment</a></li>\
-            <li><a href="/owners">List All Owners</a></li>\
-            <li><a href="/owners/new">Enter a New Car Owner</a></li>\
-            <li><a href="/owners/:id">List Details of a Single Owner"</a></li>\
-            <li><a href="/owners/:id/edit">Edit Owner Details</a></li>\
-            <li><a href="/cars">Display a Graph of Cars</a></li>\
-        </ul>\
-        '
+        <h1>Welcome to The Main Page</h1>\
+        <img src="https://wallpaperaccess.com/full/433423.jpg"/><br></br>' +
+        ul_links
     );
 });
 
-app.get('/*', function(req, res){
+
+
+app.put(path, function(req, res){
     res.send(error);
 });
 
-app.put('/*', function(req, res){
+app.post(path, function(req, res){
     res.send(error);
 });
 
-app.post('/*', function(req, res){
+app.delete(path, function(req, res){
     res.send(error);
 });
 
-app.delete('/*', function(req, res){
+path = '/*'
+
+app.get(path, function(req, res){
+    res.send(error);
+});
+
+app.put(path, function(req, res){
+    res.send(error);
+});
+
+app.post(path, function(req, res){
+    res.send(error);
+});
+
+app.delete(path, function(req, res){
     res.send(error);
 });
 
 // Listening on port 3000
-app.listen(3000);
+app.listen(port, () => {
+    console.log('App is listening on port ' + port);
+});
